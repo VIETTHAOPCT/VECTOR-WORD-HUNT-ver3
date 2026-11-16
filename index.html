@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VECTOR WORD HUNT — Giải Mã Mật Mã Vectơ</title>
+<style>
+  :root {
+    --bg-grad: linear-gradient(135deg, #e0f2fe 0%, #fef9c3 50%, #fce7f3 100%);
+    --card-bg: #ffffff;
+    --primary: #0284c7;
+    --primary-dark: #0369a1;
+    --accent: #f59e0b;
+    --success: #16a34a;
+    --text-main: #0f172a;
+    --text-muted: #475569;
+    --border-soft: #cbd5e1;
+  }
+
+  * {
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  body {
+    margin: 0;
+    padding: 14px 18px;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg-grad);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Top Header Bar */
+  .top-bar {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 10px 20px;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border: 2px solid #bae6fd;
+  }
+
+  .title-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .title-badge {
+    background: linear-gradient(135deg, #0284c7, #2563eb);
+    color: #fff;
+    font-weight: 900;
+    font-size: 1.35rem;
+    padding: 8px 14px;
+    border-radius: 14px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+  }
+
+  .title-text h1 {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 900;
+    color: #0f172a;
+    letter-spacing: 0.4px;
+  }
+
+  .title-text p {
+    margin: 2px 0 0;
+    font-size: 0.95rem;
+    color: #475569;
+    font-weight: 600;
+  }
+
+  .controls-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .timer-pill {
+    background: #fef3c7;
+    border: 2px solid #f59e0b;
+    color: #b45309;
+    font-weight: 900;
+    font-size: 1.45rem;
+    padding: 6px 16px;
+    border-radius: 14px;
+    font-variant-numeric: tabular-nums;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .timer-pill.danger {
+    background: #fee2e2;
+    border-color: #ef4444;
+    color: #b91c1c;
+    animation: pulse 0.8s infinite alternate;
+  }
+
+  @keyframes pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.06); }
+  }
+
+  .btn {
+    border: none;
+    border-radius: 12px;
+    padding: 9px 15px;
+    font-size: 0.98rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.15s;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); }
+
+  .btn-start { background: #16a34a; color: #fff; }
+  .btn-start:hover { background: #15803d; }
+
+  .btn-bgm { background: #8b5cf6; color: #fff; }
+  .btn-bgm.active { background: #6d28d9; box-shadow: 0 0 0 3px #ddd6fe; }
+
+  .btn-reveal-all { background: #f59e0b; color: #fff; }
+  .btn-reveal-all:hover { background: #d97706; }
+
+  .btn-reset { background: #e2e8f0; color: #1e293b; }
+  .btn-reset:hover { background: #cbd5e1; }
+
+  /* Main Layout */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr;
+    gap: 16px;
+    flex: 1;
+    align-items: stretch;
+  }
+
+  @media (max-width: 1024px) {
+    .main-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Left Matrix Panel */
+  .matrix-card {
+    background: #ffffff;
+    border-radius: 22px;
+    padding: 16px;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.09);
+    border: 3px solid #7dd3fc;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .instruction-banner {
+    width: 100%;
+    background: #eff6ff;
+    border: 1.5px dashed #3b82f6;
+    color: #1e40af;
+    border-radius: 12px;
+    padding: 8px 14px;
+    margin-bottom: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .board-wrapper {
+    display: grid;
+    grid-template-columns: 42px repeat(10, minmax(30px, 58px));
+    grid-template-rows: 38px repeat(10, minmax(30px, 58px));
+    gap: 6px;
+    touch-action: none;
+  }
+
+  .coord-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 1.15rem;
+    color: #0284c7;
+    background: #e0f2fe;
+    border-radius: 10px;
+  }
+
+  .coord-corner {
+    background: #bae6fd;
+    color: #0369a1;
+    font-size: 1rem;
+  }
+
+  .letter-cell {
+    background: #f8fafc;
+    border: 2.5px solid #cbd5e1;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: #0f172a;
+    cursor: pointer;
+    transition: transform 0.12s ease, background 0.15s ease, border-color 0.15s ease;
+    position: relative;
+  }
+
+  @media (max-width: 640px) {
+    .board-wrapper {
+      grid-template-columns: 28px repeat(10, 1fr);
+      grid-template-rows: 28px repeat(10, 1fr);
+      gap: 3px;
+      width: 100%;
+    }
+    .coord-cell { font-size: 0.85rem; border-radius: 6px; }
+    .letter-cell { font-size: 1.1rem; border-radius: 7px; border-width: 1.5px; aspect-ratio: 1; }
+  }
+
+  .letter-cell:hover {
+    background: #fef08a;
+    border-color: #eab308;
+    transform: scale(1.06);
+    z-index: 2;
+  }
+
+  .letter-cell.selecting {
+    background: #fde047 !important;
+    border-color: #ca8a04 !important;
+    color: #713f12 !important;
+    transform: scale(1.08);
+    box-shadow: 0 4px 12px rgba(234, 179, 8, 0.45);
+    z-index: 3;
+  }
+
+  .letter-cell.anchor-start {
+    outline: 4px solid #ef4444;
+    background: #fef08a;
+  }
+
+  .letter-cell.found {
+    color: #ffffff !important;
+    border-color: rgba(255,255,255,0.65) !important;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  @keyframes popIn {
+    0% { transform: scale(0.75); }
+    65% { transform: scale(1.16); }
+    100% { transform: scale(1); }
+  }
+
+  /* Right Panel: Word Bank + Team Scoreboard */
+  .right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .panel-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 14px 16px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    border: 2.5px solid #fde68a;
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .panel-title {
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .progress-badge {
+    background: #dcfce7;
+    color: #15803d;
+    border: 2px solid #22c55e;
+    font-weight: 900;
+    font-size: 1.05rem;
+    padding: 4px 12px;
+    border-radius: 999px;
+  }
+
+  .word-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .word-item {
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 13px;
+    padding: 8px 11px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    transition: all 0.25s ease;
+  }
+
+  .word-item.locked {
+    background: #f1f5f9;
+    border: 2px dashed #94a3b8;
+  }
+
+  .word-item.found-hidden {
+    background: #ecfdf5;
+    border: 2px solid #34d399;
+  }
+
+  .word-item.solved {
+    background: #f0fdf4;
+    border: 2px solid #22c55e;
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .word-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .word-en {
+    font-size: 1.12rem;
+    font-weight: 900;
+    letter-spacing: 0.4px;
+    color: #1e293b;
+  }
+
+  .word-item.locked .word-en {
+    color: #64748b;
+    font-size: 1.05rem;
+  }
+
+  .word-item.found-hidden .word-en {
+    color: #059669;
+    font-size: 1.05rem;
+  }
+
+  .word-item.solved .word-en {
+    color: #15803d;
+  }
+
+  .word-vi {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #64748b;
+  }
+
+  .word-item.solved .word-vi {
+    color: #166534;
+  }
+
+  .vault-note {
+    margin-top: 10px;
+    background: #fefce8;
+    border: 1.5px solid #fde047;
+    color: #854d0e;
+    border-radius: 11px;
+    padding: 7px 12px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .vault-note.unlocked-note {
+    background: #dcfce7;
+    border-color: #4ade80;
+    color: #166534;
+  }
+
+  .word-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .mini-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 5px 9px;
+    font-size: 0.9rem;
+    font-weight: 800;
+    cursor: pointer;
+    background: #fef3c7;
+    color: #b45309;
+  }
+
+  .mini-btn:hover {
+    background: #fde68a;
+  }
+
+  /* Team Scoreboard */
+  .teams-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  .team-box {
+    border-radius: 16px;
+    padding: 10px 8px;
+    text-align: center;
+    border: 2.5px solid transparent;
+    transition: transform 0.15s;
+  }
+
+  .team-box:hover { transform: translateY(-2px); }
+
+  .team-1 { background: #eff6ff; border-color: #3b82f6; color: #1d4ed8; }
+  .team-2 { background: #fef2f2; border-color: #ef4444; color: #b91c1c; }
+  .team-3 { background: #f0fdf4; border-color: #22c55e; color: #15803d; }
+  .team-4 { background: #faf5ff; border-color: #a855f7; color: #7e22ce; }
+
+  .team-name {
+    font-size: 1rem;
+    font-weight: 900;
+    margin-bottom: 4px;
+  }
+
+  .team-score {
+    font-size: 1.9rem;
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 6px;
+  }
+
+  .team-btns {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .score-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-weight: 900;
+    font-size: 0.95rem;
+    cursor: pointer;
+    color: #fff;
+  }
+
+  .score-plus { background: #16a34a; }
+  .score-minus { background: #94a3b8; }
+
+  /* Toast Banner */
+  .toast-banner {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: #fde047;
+    padding: 14px 28px;
+    border-radius: 999px;
+    font-size: 1.35rem;
+    font-weight: 900;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+    border: 3px solid #facc15;
+    z-index: 999;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .toast-banner.show {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  #confetti-canvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 998;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+<div id="toast" class="toast-banner">🎉 Tuyệt vời!</div>
+
+<!-- Header Bar -->
+<header class="top-bar">
+  <div class="title-box">
+    <div class="title-badge">🧭 VECTOR HUNT</div>
+    <div class="title-text">
+      <h1>GIẢI MÃ MẬT MÃ VECTƠ (VECTOR WORD HUNT)</h1>
+      <p>Tìm 10 thuật ngữ tiếng Anh về khái niệm mở đầu của vectơ (Hàng ngang &amp; Hàng dọc)</p>
+    </div>
+  </div>
+
+  <div class="controls-group">
+    <div id="timerDisplay" class="timer-pill">⏱️ 02:00</div>
+    <button id="btnTimer" class="btn btn-start" onclick="toggleTimer()">▶️ Bắt đầu (2 phút)</button>
+    <button id="btnBgm" class="btn btn-bgm" onclick="toggleBGM()">🎵 Nhạc sôi nổi: TẮT</button>
+    <button class="btn btn-reveal-all" onclick="revealAllWords()">✨ Mở toàn bộ</button>
+    <button class="btn btn-reset" onclick="resetGame()">🔄 Chơi lại</button>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="main-grid">
+  <!-- Left: 10x10 Word Search Matrix -->
+  <section class="matrix-card">
+    <div class="instruction-banner">
+      💡 Cách chơi: <b>Kéo chuột / vuốt</b> qua các chữ cái, hoặc <b>Bấm chữ đầu → Bấm chữ cuối</b> (Tìm đủ 10 từ để mở khóa danh sách từ khóa)!
+    </div>
+    <div id="board" class="board-wrapper"></div>
+  </section>
+
+  <!-- Right: Hidden Word Vault & Scoreboard -->
+  <section class="right-column">
+    <div class="panel-card">
+      <div class="panel-header">
+        <div id="vaultTitle" class="panel-title">🔒 10 TỪ KHÓA BÍ MẬT (ĐÃ ẨN)</div>
+        <div id="progressBadge" class="progress-badge">0 / 10 từ</div>
+      </div>
+      <div id="wordList" class="word-list"></div>
+      <div id="vaultNote" class="vault-note">
+        🕵️ Tìm đủ 10/10 từ trên bảng chữ cái để mở khóa toàn bộ từ vựng &amp; nghĩa tiếng Việt!
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <div class="panel-header">
+        <div class="panel-title">🏆 BẢNG ĐIỂM THI ĐUA CÁC TỔ (+10 điểm / từ đúng)</div>
+      </div>
+      <div class="teams-grid">
+        <div class="team-box team-1">
+          <div class="team-name">TỔ 1</div>
+          <div id="score-1" class="team-score">0</div>
+          <div class="team-btns">
+            <button class="score-btn score-plus" onclick="changeScore(1, 10)">+10</button>
+            <button class="score-btn score-minus" onclick="changeScore(1, -5)">-5</button>
+          </div>
+        </div>
+        <div class="team-box team-2">
+          <div class="team-name">TỔ 2</div>
+          <div id="score-2" class="team-score">0</div>
+          <div class="team-btns">
+            <button class="score-btn score-plus" onclick="changeScore(2, 10)">+10</button>
+            <button class="score-btn score-minus" onclick="changeScore(2, -5)">-5</button>
+          </div>
+        </div>
+        <div class="team-box team-3">
+          <div class="team-name">TỔ 3</div>
+          <div id="score-3" class="team-score">0</div>
+          <div class="team-btns">
+            <button class="score-btn score-plus" onclick="changeScore(3, 10)">+10</button>
+            <button class="score-btn score-minus" onclick="changeScore(3, -5)">-5</button>
+          </div>
+        </div>
+        <div class="team-box team-4">
+          <div class="team-name">TỔ 4</div>
+          <div id="score-4" class="team-score">0</div>
+          <div class="team-btns">
+            <button class="score-btn score-plus" onclick="changeScore(4, 10)">+10</button>
+            <button class="score-btn score-minus" onclick="changeScore(4, -5)">-5</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+  const GRID_DATA = [
+    ["C","O","I","N","I","N","C","I","D","E"],
+    ["B","A","S","E","S","A","M","E","U","I"],
+    ["T","E","R","M","I","N","A","L","L","N"],
+    ["D","A","X","I","H","H","E","X","E","I"],
+    ["P","A","R","A","L","L","E","L","N","T"],
+    ["D","V","X","R","C","S","N","B","G","I"],
+    ["O","P","P","O","S","I","T","E","T","A"],
+    ["A","C","G","H","Q","T","A","R","H","L"],
+    ["G","V","E","C","T","O","R","W","U","W"],
+    ["Z","E","R","O","V","E","C","T","O","R"]
+  ];
+
+  const WORDS = [
+    { word: "COININCIDE", display: "COININCIDE",  vi: "Trùng nhau",  color: "#ef4444", coords: [[0,0],[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7],[0,8],[0,9]] },
+    { word: "INITIAL",    display: "INITIAL",     vi: "Điểm đầu",    color: "#2563eb", coords: [[1,9],[2,9],[3,9],[4,9],[5,9],[6,9],[7,9]] },
+    { word: "TERMINAL",   display: "TERMINAL",    vi: "Điểm cuối",   color: "#16a34a", coords: [[2,0],[2,1],[2,2],[2,3],[2,4],[2,5],[2,6],[2,7]] },
+    { word: "PARALLEL",   display: "PARALLEL",    vi: "Cùng phương", color: "#9333ea", coords: [[4,0],[4,1],[4,2],[4,3],[4,4],[4,5],[4,6],[4,7]] },
+    { word: "OPPOSITE",   display: "OPPOSITE",    vi: "Ngược hướng", color: "#ea580c", coords: [[6,0],[6,1],[6,2],[6,3],[6,4],[6,5],[6,6],[6,7]] },
+    { word: "VECTOR",     display: "VECTOR",      vi: "Vectơ",       color: "#0284c7", coords: [[8,1],[8,2],[8,3],[8,4],[8,5],[8,6]] },
+    { word: "LENGTH",     display: "LENGTH",      vi: "Độ dài",      color: "#db2777", coords: [[2,8],[3,8],[4,8],[5,8],[6,8],[7,8]] },
+    { word: "BASE",       display: "BASE",        vi: "Giá vectơ",   color: "#0d9488", coords: [[1,0],[1,1],[1,2],[1,3]] },
+    { word: "ZEROVECTOR", display: "ZERO-VECTOR", vi: "Vectơ-không", color: "#ca8a04", coords: [[9,0],[9,1],[9,2],[9,3],[9,4],[9,5],[9,6],[9,7],[9,8],[9,9]] },
+    { word: "SAME",       display: "SAME",        vi: "Cùng hướng",  color: "#4f46e5", coords: [[1,4],[1,5],[1,6],[1,7]] }
+  ];
+
+  let foundWords = new Set();
+  let isDragging = false;
+  let startCell = null;
+  let currentPath = [];
+  let clickAnchor = null;
+  let scores = { 1: 0, 2: 0, 3: 0, 4: 0 };
+
+  // Timer variables
+  let timeLeft = 120;
+  let timerInterval = null;
+  let isTimerRunning = false;
+
+  // Web Audio API Synthesizer (100% offline sound effects)
+  let audioCtx = null;
+  let bgmInterval = null;
+  let isBgmOn = false;
+
+  function ensureAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === "suspended") {
+      audioCtx.resume();
+    }
+  }
+
+  function playTone(freq, duration = 0.14, type = "sine", vol = 0.16, delay = 0) {
+    try {
+      ensureAudio();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
+      gain.gain.setValueAtTime(vol, audioCtx.currentTime + delay);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(audioCtx.currentTime + delay);
+      osc.stop(audioCtx.currentTime + delay + duration);
+    } catch (e) {}
+  }
+
+  function playStepSound(stepIndex) {
+    const scale = [523.25, 587.33, 659.25, 698.46, 783.99, 880.0, 987.77, 1046.5, 1174.66, 1318.5];
+    const freq = scale[stepIndex % scale.length];
+    playTone(freq, 0.12, "triangle", 0.18, 0);
+  }
+
+  function playWinWordSound() {
+    playTone(523.25, 0.15, "triangle", 0.22, 0);
+    playTone(659.25, 0.15, "triangle", 0.22, 0.09);
+    playTone(783.99, 0.18, "triangle", 0.22, 0.18);
+    playTone(1046.5, 0.35, "triangle", 0.25, 0.27);
+  }
+
+  function playGrandVictorySound() {
+    const notes = [523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5];
+    notes.forEach((n, i) => playTone(n, 0.22, "triangle", 0.25, i * 0.12));
+  }
+
+  function playErrorSound() {
+    playTone(220, 0.15, "sawtooth", 0.1, 0);
+    playTone(180, 0.18, "sawtooth", 0.1, 0.1);
+  }
+
+  function toggleBGM() {
+    const btn = document.getElementById("btnBgm");
+    if (isBgmOn) {
+      clearInterval(bgmInterval);
+      isBgmOn = false;
+      btn.textContent = "🎵 Nhạc sôi nổi: TẮT";
+      btn.classList.remove("active");
+    } else {
+      ensureAudio();
+      isBgmOn = true;
+      btn.textContent = "🎵 Nhạc sôi nổi: BẬT";
+      btn.classList.add("active");
+      const bassPattern = [261.63, 329.63, 392.00, 329.63, 293.66, 349.23, 440.00, 349.23];
+      let beat = 0;
+      bgmInterval = setInterval(() => {
+        if (!isBgmOn) return;
+        playTone(bassPattern[beat % bassPattern.length], 0.16, "sine", 0.06, 0);
+        beat++;
+      }, 280);
+    }
+  }
+
+  function speakEnglish(text) {
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      const spoken = text.replace(/-/g, " ").toLowerCase();
+      const utter = new SpeechSynthesisUtterance(spoken);
+      utter.lang = "en-US";
+      utter.rate = 0.92;
+      window.speechSynthesis.speak(utter);
+    }
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => t.classList.remove("show"), 2600);
+  }
+
+  // Confetti burst
+  function launchConfetti(count = 65) {
+    const canvas = document.getElementById("confetti-canvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const colors = ["#ef4444", "#f59e0b", "#10b981", "#3b82f6", "#a855f7", "#ec4899"];
+    const pieces = Array.from({ length: count }, () => ({
+      x: canvas.width * (0.2 + Math.random() * 0.6),
+      y: canvas.height * 0.45,
+      vx: (Math.random() - 0.5) * 14,
+      vy: -Math.random() * 12 - 4,
+      size: 7 + Math.random() * 7,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rot: Math.random() * 360,
+      vrot: (Math.random() - 0.5) * 12
+    }));
+
+    let frame = 0;
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      pieces.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.38;
+        p.rot += p.vrot;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rot * Math.PI) / 180);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.65);
+        ctx.restore();
+      });
+      frame++;
+      if (frame < 75) requestAnimationFrame(animate);
+      else ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    animate();
+  }
+
+  // Build Matrix Board
+  function renderBoard() {
+    const board = document.getElementById("board");
+    board.innerHTML = "";
+
+    // Top-left corner
+    const corner = document.createElement("div");
+    corner.className = "coord-cell coord-corner";
+    corner.textContent = "H\C";
+    board.appendChild(corner);
+
+    // Column headers 1..10
+    for (let c = 1; c <= 10; c++) {
+      const colHead = document.createElement("div");
+      colHead.className = "coord-cell";
+      colHead.textContent = c;
+      board.appendChild(colHead);
+    }
+
+    // Rows 1..10
+    for (let r = 0; r < 10; r++) {
+      const rowHead = document.createElement("div");
+      rowHead.className = "coord-cell";
+      rowHead.textContent = r + 1;
+      board.appendChild(rowHead);
+
+      for (let c = 0; c < 10; c++) {
+        const cell = document.createElement("div");
+        cell.className = "letter-cell";
+        cell.id = `cell-${r}-${c}`;
+        cell.dataset.r = r;
+        cell.dataset.c = c;
+        cell.textContent = GRID_DATA[r][c];
+
+        cell.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          handlePointerStart(r, c);
+        });
+        cell.addEventListener("mouseenter", () => {
+          if (isDragging) handlePointerMove(r, c);
+        });
+        cell.addEventListener("click", () => handleCellClick(r, c));
+
+        cell.addEventListener("touchstart", (e) => {
+          e.preventDefault();
+          handlePointerStart(r, c);
+        }, { passive: false });
+
+        board.appendChild(cell);
+      }
+    }
+
+    board.addEventListener("touchmove", (e) => {
+      if (!isDragging) return;
+      e.preventDefault();
+      const touch = e.touches[0];
+      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (target && target.classList.contains("letter-cell")) {
+        const r = parseInt(target.dataset.r, 10);
+        const c = parseInt(target.dataset.c, 10);
+        handlePointerMove(r, c);
+      }
+    }, { passive: false });
+
+    window.addEventListener("mouseup", handlePointerEnd);
+    window.addEventListener("touchend", handlePointerEnd);
+  }
+
+  // Render Word List: Hidden until ALL 10 words are found!
+  function renderWordList() {
+    const list = document.getElementById("wordList");
+    const titleEl = document.getElementById("vaultTitle");
+    const badgeEl = document.getElementById("progressBadge");
+    const noteEl = document.getElementById("vaultNote");
+
+    list.innerHTML = "";
+    const allUnlocked = foundWords.size === WORDS.length;
+
+    if (!allUnlocked) {
+      titleEl.textContent = "🔒 10 TỪ KHÓA BÍ MẬT (ĐÃ ẨN)";
+      badgeEl.textContent = `${foundWords.size} / ${WORDS.length} từ`;
+      noteEl.className = "vault-note";
+      noteEl.innerHTML = `🕵️ Đã tìm được <b>${foundWords.size}/10</b> từ. Tìm đủ <b>10/10 từ</b> trên bảng chữ cái để mở khóa toàn bộ danh sách!`;
+
+      for (let idx = 0; idx < WORDS.length; idx++) {
+        const isSlotFound = idx < foundWords.size;
+        const div = document.createElement("div");
+        div.className = "word-item " + (isSlotFound ? "found-hidden" : "locked");
+        div.innerHTML = isSlotFound
+          ? `
+            <div class="word-info">
+              <span class="word-en">✅ Từ mật mã #${idx + 1}</span>
+              <span class="word-vi">Đã tìm thấy! Chờ mở đủ 10 từ...</span>
+            </div>
+          `
+          : `
+            <div class="word-info">
+              <span class="word-en">🔒 Từ mật mã #${idx + 1}</span>
+              <span class="word-vi">??? (Đang ẩn)</span>
+            </div>
+          `;
+        list.appendChild(div);
+      }
+    } else {
+      titleEl.textContent = "🎉 10 TỪ KHÓA ĐÃ MỞ KHÓA!";
+      badgeEl.textContent = `10 / 10 từ ✓`;
+      noteEl.className = "vault-note unlocked-note";
+      noteEl.innerHTML = `🏆 Xuất sắc! Cả lớp đã mở khóa toàn bộ 10 thuật ngữ vectơ — Bấm <b>🔊</b> để luyện phát âm!`;
+
+      WORDS.forEach((item, idx) => {
+        const div = document.createElement("div");
+        div.className = "word-item solved";
+        div.id = `word-card-${item.word}`;
+        div.innerHTML = `
+          <div class="word-info">
+            <span class="word-en">${idx + 1}. ${item.display}</span>
+            <span class="word-vi">${item.vi}</span>
+          </div>
+          <div class="word-actions">
+            <button class="mini-btn" title="Phát âm tiếng Anh" onclick="speakEnglish('${item.display}')">🔊</button>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    }
+  }
+
+  function getLineCells(r1, c1, r2, c2) {
+    if (r1 === r2) {
+      const step = c1 <= c2 ? 1 : -1;
+      const path = [];
+      for (let c = c1; c !== c2 + step; c += step) path.push([r1, c]);
+      return path;
+    }
+    if (c1 === c2) {
+      const step = r1 <= r2 ? 1 : -1;
+      const path = [];
+      for (let r = r1; r !== r2 + step; r += step) path.push([r, c1]);
+      return path;
+    }
+    return [[r1, c1]];
+  }
+
+  function clearTempSelection() {
+    document.querySelectorAll(".letter-cell.selecting").forEach(el => el.classList.remove("selecting"));
+  }
+
+  function handlePointerStart(r, c) {
+    isDragging = true;
+    startCell = [r, c];
+    currentPath = [[r, c]];
+    clearTempSelection();
+    document.getElementById(`cell-${r}-${c}`).classList.add("selecting");
+    playStepSound(0);
+  }
+
+  function handlePointerMove(r, c) {
+    if (!isDragging || !startCell) return;
+    const newPath = getLineCells(startCell[0], startCell[1], r, c);
+    if (newPath.length !== currentPath.length) {
+      playStepSound(newPath.length - 1);
+    }
+    currentPath = newPath;
+    clearTempSelection();
+    currentPath.forEach(([pr, pc]) => {
+      document.getElementById(`cell-${pr}-${pc}`).classList.add("selecting");
+    });
+  }
+
+  function handlePointerEnd() {
+    if (!isDragging) return;
+    isDragging = false;
+    if (currentPath.length > 1) {
+      checkSelectedPath(currentPath);
+      clearAnchor();
+    }
+    clearTempSelection();
+    startCell = null;
+    currentPath = [];
+  }
+
+  function clearAnchor() {
+    if (clickAnchor) {
+      const oldEl = document.getElementById(`cell-${clickAnchor[0]}-${clickAnchor[1]}`);
+      if (oldEl) oldEl.classList.remove("anchor-start");
+      clickAnchor = null;
+    }
+  }
+
+  function handleCellClick(r, c) {
+    if (!clickAnchor) {
+      clickAnchor = [r, c];
+      document.getElementById(`cell-${r}-${c}`).classList.add("anchor-start");
+      playStepSound(0);
+    } else {
+      const [ar, ac] = clickAnchor;
+      if (ar === r && ac === c) {
+        clearAnchor();
+        return;
+      }
+      const path = getLineCells(ar, ac, r, c);
+      clearAnchor();
+      if (path.length > 1) {
+        checkSelectedPath(path);
+      }
+    }
+  }
+
+  function checkSelectedPath(path) {
+    const forward = path.map(([r, c]) => GRID_DATA[r][c]).join("");
+    const backward = forward.split("").reverse().join("");
+
+    const matched = WORDS.find(w => w.word === forward || w.word === backward);
+    if (matched) {
+      if (!foundWords.has(matched.word)) {
+        markWordFound(matched, true);
+      } else {
+        speakEnglish(matched.display);
+        showToast(`✅ Từ "${matched.display}" đã được tìm thấy rồi!`);
+      }
+    } else if (path.length >= 3) {
+      playErrorSound();
+    }
+  }
+
+  function markWordFound(item, celebrate = true) {
+    foundWords.add(item.word);
+    item.coords.forEach(([r, c]) => {
+      const cell = document.getElementById(`cell-${r}-${c}`);
+      cell.classList.add("found");
+      cell.style.background = item.color;
+    });
+    renderWordList();
+
+    if (celebrate) {
+      playWinWordSound();
+      speakEnglish(item.display);
+      launchConfetti(foundWords.size === WORDS.length ? 150 : 55);
+      showToast(`🎉 CHÍNH XÁC! ${item.display} — ${item.vi} (${foundWords.size}/10)`);
+      if (foundWords.size === WORDS.length) {
+        setTimeout(() => {
+          playGrandVictorySound();
+          showToast("🏆 XUẤT SẮC! ĐÃ MỞ KHÓA TOÀN BỘ 10 TỪ KHÓA MẬT MÃ!");
+        }, 700);
+      }
+    }
+  }
+
+  function revealAllWords() {
+    WORDS.forEach(item => {
+      if (!foundWords.has(item.word)) {
+        markWordFound(item, false);
+      }
+    });
+    playGrandVictorySound();
+    launchConfetti(130);
+    showToast("✨ Đã mở khóa toàn bộ 10 từ khóa mật mã!");
+  }
+
+  function resetGame() {
+    foundWords.clear();
+    clearAnchor();
+    clearTempSelection();
+    renderBoard();
+    renderWordList();
+    resetTimer();
+    showToast("🔄 Đã ẩn lại 10 từ khóa và làm mới bảng!");
+  }
+
+  // Scoreboard
+  function changeScore(teamId, delta) {
+    scores[teamId] = Math.max(0, scores[teamId] + delta);
+    document.getElementById(`score-${teamId}`).textContent = scores[teamId];
+    if (delta > 0) {
+      playTone(880, 0.14, "triangle", 0.2, 0);
+      playTone(1174.66, 0.2, "triangle", 0.2, 0.08);
+    }
+  }
+
+  // Timer
+  function updateTimerUI() {
+    const mins = String(Math.floor(timeLeft / 60)).padStart(2, "0");
+    const secs = String(timeLeft % 60).padStart(2, "0");
+    const el = document.getElementById("timerDisplay");
+    el.textContent = `⏱️ ${mins}:${secs}`;
+    if (timeLeft <= 15 && timeLeft > 0) el.classList.add("danger");
+    else el.classList.remove("danger");
+  }
+
+  function toggleTimer() {
+    const btn = document.getElementById("btnTimer");
+    if (isTimerRunning) {
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+      btn.textContent = "▶️ Tiếp tục";
+    } else {
+      ensureAudio();
+      if (timeLeft <= 0) timeLeft = 120;
+      isTimerRunning = true;
+      btn.textContent = "⏸️ Tạm dừng";
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimerUI();
+        if (timeLeft <= 10 && timeLeft > 0) {
+          playTone(880, 0.08, "sine", 0.12, 0);
+        }
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          isTimerRunning = false;
+          btn.textContent = "▶️ Bắt đầu (2 phút)";
+          playErrorSound();
+          showToast("⏰ HẾT GIỜ! Bấm 'Mở toàn bộ' nếu muốn hiện đáp án!");
+        }
+      }, 1000);
+    }
+  }
+
+  function resetTimer() {
+    clearInterval(timerInterval);
+    isTimerRunning = false;
+    timeLeft = 120;
+    updateTimerUI();
+    document.getElementById("btnTimer").textContent = "▶️ Bắt đầu (2 phút)";
+  }
+
+  // Initialize
+  renderBoard();
+  renderWordList();
+  updateTimerUI();
+</script>
+</body>
+</html>
